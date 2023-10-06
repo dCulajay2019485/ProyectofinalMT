@@ -10,12 +10,12 @@ Carnet
 
 #include <SoftwareSerial.h>
 
-const int MED1 = 2;         // Pin positivo
-const int MED2 = 3;         // Pin negativo
+const int medir1 = 2;         // Pin positivo
+const int medir2 = 3;         // Pin negativo
 int Valuable;                // Variable que almacena el valor raw (0 a 1023)
-float VOLTAGE;               // Variable que almacena el voltaje (0.0 a 25.0)
+float vol;               // Variable que almacena el voltaje (0.0 a 25.0)
 
-float Sensibilidad = 0.185;
+float Sensi = 0.185;
 
 const int pinAnalogico = A2;    // Pin analógico para medir la tensión
 const float resistenciaConocida = 1000.0; // Resistencia conocida en ohmios (1k ohm)
@@ -62,13 +62,33 @@ void loop() {
   }
 }
 
+void medirCorriente() {
+  float Corriente=calculo(500);
+      Serial.print("Corriente: ");
+      Serial.println(Corriente,3);
+      BLUEE.print(Corriente,3);
+      BLUEE.print(";");
+}
+float calculo(int numeroMuestral)
+{
+float LeerSenso = 0;
+float inten = 0;
+for(int i=0;i<numeroMuestral;i++)
+{
+  LeerSenso= analogRead(A2) * (5.0 / 1023.0);
+  inten=inten+(LeerSenso-2.5)/Sensibilidad;
+}
+inten=inten/numeroMuestral;
+return(inten);
+}
+
 void medirVoltaje() {
-  digitalWrite(MED1, HIGH);
-  digitalWrite(MED2, HIGH);
-  Valuable = analogRead(A1);               // Realizar la lectura
+  digitalWrite(medir1, HIGH);
+  digitalWrite(medir2, HIGH);
+  Valuable = analogRead(A2);               // Realizar la lectura
   VOLTAGE = map(Valuable, 0, 1023, 0, 250) / 10.0;  // Escalar a 0.0 - 25.0
   Serial.print("Voltaje: ");
-  Serial.println(VOLTAGE);          // Mostrar el valor por serial
+  Serial.println(VOL);          // Mostrar el valor por serial
   BLUEE.print(VOLTAGE);
   BLUEE.print(";");
 }
@@ -91,24 +111,4 @@ void medirResistencia() {
   Serial.println(resistenciaDesconocida);
   BLUEE.print(resistenciaDesconocida);
   BLUEE.print(";");
-}
-
-void medirCorriente() {
-  float Corriente=calculo(500);
-      Serial.print("Corriente: ");
-      Serial.println(Corriente,3);
-      BLUEE.print(Corriente,3);
-      BLUEE.print(";");
-}
-float calculo(int numeroMuestral)
-{
-float LeerSenso = 0;
-float inten = 0;
-for(int i=0;i<numeroMuestral;i++)
-{
-  LeerSenso= analogRead(A2) * (5.0 / 1023.0);
-  inten=inten+(LeerSenso-2.5)/Sensibilidad;
-}
-inten=inten/numeroMuestral;
-return(inten);
 }
